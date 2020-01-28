@@ -95,62 +95,7 @@ def calculateGain(entropyAttributes, gainAttributes):
     
     return round(entropy,3)
 
-def createTree(curNode, root, side):
-
-    gainValues = {}
-
-    # CHECK IF DONE
-    if (curNode.possibleAttrs == []):
-        root.reset_possibleAttrs()
-        # print(root.possibleAttrs)
-        return
-
-    # SET ENTROPY FOR curNode
-    curNode.set_entropy(calculateEntropy(curNode.namesList)[0])
-
-    # DETERMINE WHICH ATTRIBUTE TO USE FOR CHILDREN
-
-    # GET ALL POSSIBLE ATTRIBUTES
-    for attr in curNode.possibleAttrs:
-        if (attr == "color"):
-            gainValues[attr] = calculateGain(curNode.namesList, colorAttr)
-        elif (attr == "type"):
-            gainValues[attr] = calculateGain(curNode.namesList, typeAttr)
-        else:
-            gainValues[attr] = calculateGain(curNode.namesList, originAttr)
- 
-    # GET ATTRIBUTE BY MAX VALUE
-    gainMaxAttr = max(gainValues.items(), key=operator.itemgetter(1))[0]
-    #print("Max attr: " + gainMaxAttr + "\nMax value: " + str(gainValues[gainMaxAttr]))
-
-    # REMOVE ATTRIBUTE FROM possibleAttrs
-    curNode.update_possibleAttrs(gainMaxAttr)
-    #print("Remaining attrs: " + str(curNode.possibleAttrs))
-
-    # SET CHILDREN BASED ON gainMaxAttr
-    # INIT CHILDREN
-    if (gainMaxAttr == "color"):
-        leftChild  = Node(colorAttr[0], curNode.possibleAttrs, curNode)     #init w/ name, possibleAttrs, parent
-        rightChild = Node(colorAttr[1], curNode.possibleAttrs, curNode)     #init w/ name, possibleAttrs, parent
-    elif (gainMaxAttr == "type"):
-        leftChild  = Node(typeAttr[0], curNode.possibleAttrs, curNode)      #init w/ name, possibleAttrs, parent
-        rightChild = Node(typeAttr[1], curNode.possibleAttrs, curNode)      #init w/ name, possibleAttrs, parent
-    else:
-        leftChild  = Node(originAttr[0], curNode.possibleAttrs, curNode)    #init w/ name, possibleAttrs, parent
-        rightChild = Node(originAttr[1], curNode.possibleAttrs, curNode)    #init w/ name, possibleAttrs, parent
-
-    # LINK CHILDREN TO curNode
-    curNode.left  = leftChild
-    curNode.right = rightChild
-
-    # UPDATE CHILDREN namesList (APPEND NAME USED)
-    leftChild.update_namesList(leftChild.name)
-    rightChild.update_namesList(rightChild.name)
-
-    # SET CHILDREN ENTROPY
-    rightChild.set_entropy(calculateEntropy(rightChild.namesList)[0])
-    leftChild.set_entropy(calculateEntropy(leftChild.namesList)[0])
-    
+def printInfo(curNode, leftChild, rightChild):
     # PRINT INFO
     print("\nCUR NAME:          " + str(curNode.name))
     print("CUR NAMES LIST:    " + str(curNode.namesList))
@@ -169,8 +114,14 @@ def createTree(curNode, root, side):
     print("LEFT POSS ATTRS:   " + str(leftChild.possibleAttrs))
     print("LEFT ENTROPY:      " + str(leftChild.entropy))
     print("LEFT PARENT NAME:  " + str(leftChild.parent.name))
-    print("LEFT LEFT PTR:     " + str(leftChild.left))
-    print("LEFT RIGHT PTR:    " + str(leftChild.right))
+    if (leftChild.left == None):
+        print("LEFT LEFT PTR:     " + str(leftChild.left))
+    else:
+        print("LEFT LEFT PTR:     " + str(leftChild.left.name))
+    if (rightChild.right == None):
+        print("LEFT RIGHT PTR:    " + str(rightChild.right))
+    else:
+        print("LEFT RIGHT PTR:    " + str(rightChild.right.name))
     print("LEFT STOLEN:       " + str(leftChild.stolen))
     
     print("\nRIGHT NAME:        " + str(rightChild.name))
@@ -184,50 +135,127 @@ def createTree(curNode, root, side):
     
     print("\n************************************************************************")
 
-    print(curNode.possibleAttrs)
+def createTree(curNode, root):
 
-    if (side == "left"):
-        createTree(leftChild, root, side)
-    
-    if (side == "right"):
-        createTree(rightChild, root, side)
+    gainValues = {}
+
+    # CHECK IF DONE
+    if (curNode.possibleAttrs == []):
+        root.reset_possibleAttrs()
+        # print(root.possibleAttrs)
+        return
+
+    # SET ENTROPY FOR curNode
+    curNode.set_entropy(calculateEntropy(curNode.namesList)[0])
+
+    # DETERMINE WHICH ATTRIBUTE TO USE FOR CHILDREN
+    # GET ALL POSSIBLE ATTRIBUTES
+    for attr in curNode.possibleAttrs:
+        if (attr == "color"):
+            gainValues[attr] = calculateGain(curNode.namesList, colorAttr)
+        elif (attr == "type"):
+            gainValues[attr] = calculateGain(curNode.namesList, typeAttr)
+        else:
+            gainValues[attr] = calculateGain(curNode.namesList, originAttr)
+ 
+    # GET ATTRIBUTE BY MAX VALUE
+    gainMaxAttr = max(gainValues.items(), key=operator.itemgetter(1))[0] 
+    #print("Max attr: " + gainMaxAttr + "\nMax value: " + str(gainValues[gainMaxAttr]))
+
+    # REMOVE ATTRIBUTE FROM possibleAttrs
+    curNode.update_possibleAttrs(gainMaxAttr)
+    #print("Remaining attrs: " + str(curNode.possibleAttrs))
+
+    #############################################################################
+    # leftChild  = Node(colorAttr[0], curNode.possibleAttrs, curNode)     #init w/ name, possibleAttrs, parent
+    # rightChild = Node(colorAttr[1], curNode.possibleAttrs, curNode)     #init w/ name, possibleAttrs, parent
+        
+    # SET CHILDREN BASED ON gainMaxAttr
+    # INIT CHILDREN
+    if (gainMaxAttr == "color"):
+        if (curNode.left == None):
+            curNode.left = Node(colorAttr[0], curNode.possibleAttrs, curNode)
+            
+        else:
+            createTree(curNode.left, root)
+
+        if (curNode.right == None):
+            curNode.right = Node(colorAttr[1], curNode.possibleAttrs, curNode)
+        else:
+            createTree(curNode.right, root)     
+
+    elif (gainMaxAttr == "type"):
+        if (curNode.left == None):
+            curNode.left = Node(typeAttr[0], curNode.possibleAttrs, curNode)
+        else:
+            createTree(curNode.left, root)
+
+        if (curNode.right == None):
+            curNode.right = Node(typeAttr[1], curNode.possibleAttrs, curNode)
+        else:
+            createTree(curNode.right, root)   
+
+    else:
+        if (curNode.left == None):
+            curNode.left = Node(originAttr[0], curNode.possibleAttrs, curNode)
+        else:
+            createTree(curNode.left, root)
+
+        if (curNode.right == None):
+            curNode.right = Node(originAttr[1], curNode.possibleAttrs, curNode)
+        else:
+            createTree(curNode.right, root)   
+   
+    # LINK CHILDREN TO curNode
+    # curNode.left  = leftChild
+    # curNode.right = rightChild
+
+    # UPDATE CHILDREN namesList (APPEND NAME USED)
+    curNode.left.update_namesList(curNode.left.name)
+    curNode.right.update_namesList(curNode.right.name)
+
+    # SET CHILDREN ENTROPY
+    curNode.left.set_entropy(calculateEntropy(curNode.left.namesList)[0])
+    curNode.right.set_entropy(calculateEntropy(curNode.right.namesList)[0])
+        
+    # PRINT INFO
+    printInfo(curNode, curNode.left, curNode.right)
+
+    # ADD ALL CHILDREN
+    # curNode.left.left = createTree(curNode.left, root)
+    # curNode.left.right = createTree(curNode.left, root)
+
+    # curNode.right.left = createTree(curNode.right, root)
+    # curNode.right.right = createTree(curNode.right, root)
+
+    # OLD STUFF
+    # if (side == "left"):
+    #     leftChild.left = createTree(leftChild, root, side)
+    #     leftChild.right = createTree(leftChild, root, side)
+
+    # if (side == "right"):
+    #     rightChild.left = createTree(rightChild, root, side)
+    #     rightChild.right = createTree(rightChild, root, side)
     
 def printTree(curNode):
     if (curNode == None):
         return
+        
     print(curNode.name)
-    printTree(curNode.left)
-    
+    printTree(curNode.left)    
     printTree(curNode.right)
     
 
 def main():
-    #calculate total entropy
-    entropy = calculateEntropy([])[0]
-    # print(round(entropy,3))
-
-    gainValues = {}
-
-    # print("THIS: ", calculateGain([],colorAttr))
-    gainValues["color"]  = calculateGain([],colorAttr)
-    gainValues["type"]   = calculateGain([],typeAttr)
-    gainValues["origin"] = calculateGain([],originAttr)
-
-    # for id in gainValues:
-    #     print(id,": ",gainValues[id])
-
-    #get max value attribute from list
-    # print(max(gainValues.items(), key=operator.itemgetter(1))[0]) #https://stackoverflow.com/questions/268272/getting-key-with-maximum-value-in-dictionary
-
-
+    
     #initialize root
     root = Node("root")
     print("\n")
     #print(root.name, root.entropy)
 
     #create tree starting from root
-    createTree(root, root, "left")
-    createTree(root, root, "right")
+    createTree(root, root)
+    createTree(root, root)
         
     printTree(root)
     #check children
