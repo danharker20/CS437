@@ -6,16 +6,16 @@ colorAttr = ["red","yellow"]
 typeAttr = ["sports","suv"]
 originAttr = ["domestic","imported"]
 allAttrs = [colorAttr,typeAttr,originAttr]
-data = {1:{"color":"red","type":"sports","origin":"domestic","stolen":"yes"},
-        2:{"color":"red","type":"sports","origin":"domestic","stolen":"no"},
-        3:{"color":"red","type":"sports","origin":"domestic","stolen":"yes"},
+data = {1:{"color":"red",   "type":"sports","origin":"domestic","stolen":"yes"},
+        2:{"color":"red",   "type":"sports","origin":"domestic","stolen":"no"},
+        3:{"color":"red",   "type":"sports","origin":"domestic","stolen":"yes"},
         4:{"color":"yellow","type":"sports","origin":"domestic","stolen":"no"},
-        5:{"color":"yellow","sports":"sports","origin":"imported","stolen":"yes"},
-        6:{"color":"yellow","type":"suv","origin":"imported","stolen":"no"},
-        7:{"color":"yellow","type":"suv","origin":"imported","stolen":"yes"},
-        8:{"color":"yellow","type":"suv","origin":"domestic","stolen":"no"},
-        9:{"color":"red","type":"suv","origin":"imported","stolen":"no"},
-        10:{"color":"red","type":"sports","origin":"imported","stolen":"yes"}}
+        5:{"color":"yellow","type":"sports","origin":"imported","stolen":"yes"},
+        6:{"color":"yellow","type":"suv",   "origin":"imported","stolen":"no"},
+        7:{"color":"yellow","type":"suv",   "origin":"imported","stolen":"yes"},
+        8:{"color":"yellow","type":"suv",   "origin":"domestic","stolen":"no"},
+        9:{"color":"red",   "type":"suv",   "origin":"imported","stolen":"no"},
+        10:{"color":"red",  "type":"sports","origin":"imported","stolen":"yes"}}
 
 class Node(object):
     def __init__(self, name, possibleAttrs = attributes, parent = None):
@@ -139,10 +139,16 @@ def createTree(curNode, root):
 
     gainValues = {}
 
+    print("Roots: " + str(root.possibleAttrs))
+    print("Curs:  " + str(curNode.possibleAttrs))
+
     # CHECK IF DONE
     if (curNode.possibleAttrs == []):
-        root.reset_possibleAttrs()
-        # print(root.possibleAttrs)
+        # createTree(root.right, root)
+        print("***STOP***")
+        print(root.possibleAttrs)
+        curNode.reset_possibleAttrs()
+        print(root.possibleAttrs)
         return
 
     # SET ENTROPY FOR curNode
@@ -163,53 +169,62 @@ def createTree(curNode, root):
     #print("Max attr: " + gainMaxAttr + "\nMax value: " + str(gainValues[gainMaxAttr]))
 
     # REMOVE ATTRIBUTE FROM possibleAttrs
-    curNode.update_possibleAttrs(gainMaxAttr)
+    curNode.update_possibleAttrs(gainMaxAttr) #RIGHT HEREEEE
     #print("Remaining attrs: " + str(curNode.possibleAttrs))
 
     #############################################################################
     # leftChild  = Node(colorAttr[0], curNode.possibleAttrs, curNode)     #init w/ name, possibleAttrs, parent
     # rightChild = Node(colorAttr[1], curNode.possibleAttrs, curNode)     #init w/ name, possibleAttrs, parent
-        
+    
+    #print(curNode.possibleAttrs) #RIGHT HERE
+    
     # SET CHILDREN BASED ON gainMaxAttr
     # INIT CHILDREN
     if (gainMaxAttr == "color"):
         if (curNode.left == None):
             curNode.left = Node(colorAttr[0], curNode.possibleAttrs, curNode)
-            
+            # curNode.left.update_possibleAttrs("color")
         else:
             createTree(curNode.left, root)
 
         if (curNode.right == None):
             curNode.right = Node(colorAttr[1], curNode.possibleAttrs, curNode)
+            # curNode.right.update_possibleAttrs("color")
         else:
             createTree(curNode.right, root)     
-
     elif (gainMaxAttr == "type"):
         if (curNode.left == None):
             curNode.left = Node(typeAttr[0], curNode.possibleAttrs, curNode)
+            # curNode.left.update_possibleAttrs("type")
         else:
             createTree(curNode.left, root)
 
         if (curNode.right == None):
             curNode.right = Node(typeAttr[1], curNode.possibleAttrs, curNode)
+            # curNode.right.update_possibleAttrs("type")
         else:
             createTree(curNode.right, root)   
-
     else:
         if (curNode.left == None):
             curNode.left = Node(originAttr[0], curNode.possibleAttrs, curNode)
+            # print(curNode.left.possibleAttrs)
+            # curNode.left.update_possibleAttrs("origin")
         else:
             createTree(curNode.left, root)
 
         if (curNode.right == None):
             curNode.right = Node(originAttr[1], curNode.possibleAttrs, curNode)
+            # curNode.right.update_possibleAttrs("origin")
         else:
             createTree(curNode.right, root)   
    
     # LINK CHILDREN TO curNode
     # curNode.left  = leftChild
     # curNode.right = rightChild
-
+    
+    # print(curNode.left.name)
+    # print(curNode.right.name)
+ 
     # UPDATE CHILDREN namesList (APPEND NAME USED)
     curNode.left.update_namesList(curNode.left.name)
     curNode.right.update_namesList(curNode.right.name)
@@ -221,22 +236,9 @@ def createTree(curNode, root):
     # PRINT INFO
     printInfo(curNode, curNode.left, curNode.right)
 
-    # ADD ALL CHILDREN
-    # curNode.left.left = createTree(curNode.left, root)
-    # curNode.left.right = createTree(curNode.left, root)
+    createTree(curNode.left, root)
+    createTree(curNode.right, root)
 
-    # curNode.right.left = createTree(curNode.right, root)
-    # curNode.right.right = createTree(curNode.right, root)
-
-    # OLD STUFF
-    # if (side == "left"):
-    #     leftChild.left = createTree(leftChild, root, side)
-    #     leftChild.right = createTree(leftChild, root, side)
-
-    # if (side == "right"):
-    #     rightChild.left = createTree(rightChild, root, side)
-    #     rightChild.right = createTree(rightChild, root, side)
-    
 def printTree(curNode):
     if (curNode == None):
         return
@@ -255,9 +257,24 @@ def main():
 
     #create tree starting from root
     createTree(root, root)
-    createTree(root, root)
-        
+
+    print("\nTREE:")   
     printTree(root)
+    print('\n')
+
+    print("START:")
+    print(root.left.name)
+    print(root.right.name)
+
+    print(root.left.left.name)
+    print(root.left.right.name)
+
+    print(root.left.left.left.name)
+    print(root.left.left.right.name)
+
+    # print(root.right.left.name)
+    # print(root.right.right.name)
+
     #check children
     # print(root.left.stolen)
     # print(root.right.stolen)
